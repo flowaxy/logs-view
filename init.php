@@ -38,7 +38,7 @@ class LogsViewPlugin extends BasePlugin
     public function init(): void
     {
         addHook('admin_register_routes', [$this, 'registerAdminRoute'], 10, 1);
-        addFilter('admin_menu', [$this, 'registerAdminMenu'], 20);
+        addFilter('admin_menu', [$this, 'registerAdminMenu'], 15);
     }
 
     public function registerAdminRoute($router): void
@@ -68,24 +68,47 @@ class LogsViewPlugin extends BasePlugin
      */
     public function registerAdminMenu(array $menu): array
     {
-        $menu[] = [
-            'text' => 'Система',
-            'icon' => 'fas fa-server',
-            'href' => '#',
-            'page' => 'system',
-            'order' => 60,
-            'permission' => null,
-            'submenu' => [
-                [
+        // Ищем существующее меню "Система"
+        $found = false;
+        foreach ($menu as &$item) {
+            if (isset($item['page']) && $item['page'] === 'system') {
+                if (!isset($item['submenu'])) {
+                    $item['submenu'] = [];
+                }
+                $item['submenu'][] = [
                     'text' => 'Логи',
                     'icon' => 'fas fa-file-alt',
                     'href' => UrlHelper::admin('logs-view'),
                     'page' => 'logs-view',
                     'order' => 1,
                     'permission' => 'admin.logs.view',
+                ];
+                $found = true;
+                break;
+            }
+        }
+        
+        // Если меню "Система" не найдено, создаем его
+        if (!$found) {
+            $menu[] = [
+                'text' => 'Система',
+                'icon' => 'fas fa-server',
+                'href' => '#',
+                'page' => 'system',
+                'order' => 60,
+                'permission' => null,
+                'submenu' => [
+                    [
+                        'text' => 'Логи',
+                        'icon' => 'fas fa-file-alt',
+                        'href' => UrlHelper::admin('logs-view'),
+                        'page' => 'logs-view',
+                        'order' => 1,
+                        'permission' => 'admin.logs.view',
+                    ],
                 ],
-            ],
-        ];
+            ];
+        }
 
         return $menu;
     }
