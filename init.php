@@ -39,6 +39,7 @@ class LogsViewPlugin extends BasePlugin
     {
         addHook('admin_register_routes', [$this, 'registerAdminRoute'], 10, 1);
         addFilter('admin_menu', [$this, 'registerAdminMenu'], 15);
+        addFilter('settings_categories', [$this, 'registerSettingsCategory'], 10);
     }
 
     public function registerAdminRoute($router): void
@@ -111,6 +112,36 @@ class LogsViewPlugin extends BasePlugin
         }
 
         return $menu;
+    }
+
+    /**
+     * Реєстрація в категоріях налаштувань
+     * 
+     * Додає плагін до категорії "Система" на сторінці /admin/settings
+     * 
+     * @param array<string, mixed> $categories Поточні категорії
+     * @return array<string, mixed> Оновлені категорії
+     */
+    public function registerSettingsCategory(array $categories): array
+    {
+        // Перевіряємо, чи плагін активний
+        $pluginManager = function_exists('pluginManager') ? pluginManager() : null;
+        if (!$pluginManager || !method_exists($pluginManager, 'isPluginActive') || !$pluginManager->isPluginActive('logs-view')) {
+            return $categories;
+        }
+
+        // Додаємо до категорії "Система"
+        if (isset($categories['system'])) {
+            $categories['system']['items'][] = [
+                'title' => 'Логи',
+                'description' => 'Перегляд системних логів',
+                'url' => UrlHelper::admin('logs-view'),
+                'icon' => 'fas fa-file-alt',
+                'permission' => 'admin.logs.view',
+            ];
+        }
+
+        return $categories;
     }
 }
 
