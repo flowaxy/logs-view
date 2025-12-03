@@ -26,7 +26,7 @@ class LogsViewAdminPage extends AdminPage
         $this->pluginDir = dirname(__DIR__, 3);
 
         // Перевірка прав доступу
-        if (! function_exists('current_user_can') || ! current_user_can('admin.logs.view')) {
+        if (! function_exists('current_user_can') || ! current_user_can('admin.access')) {
             Response::redirectStatic(UrlHelper::admin('dashboard'));
             exit;
         }
@@ -323,7 +323,7 @@ class LogsViewAdminPage extends AdminPage
         }
 
         // Перевірка прав доступу
-        if (! function_exists('current_user_can') || ! current_user_can('admin.logs.delete')) {
+        if (! function_exists('current_user_can') || ! current_user_can('admin.access')) {
             $this->setMessage('У вас немає прав на видалення логів', 'danger');
 
             return;
@@ -566,7 +566,7 @@ class LogsViewAdminPage extends AdminPage
     private function exportLogs(): void
     {
         // Перевірка прав доступу
-        if (! function_exists('current_user_can') || ! current_user_can('admin.logs.export')) {
+        if (! function_exists('current_user_can') || ! current_user_can('admin.access')) {
             http_response_code(403);
             echo 'У вас немає прав на експорт логів';
             exit;
