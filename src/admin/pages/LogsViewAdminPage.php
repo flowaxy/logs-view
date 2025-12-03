@@ -355,6 +355,7 @@ class LogsViewAdminPage extends AdminPage
                 }
             }
 
+            logger()->logInfo('Видалено всі файли логів', ['deleted_count' => $deleted]);
             $this->setMessage("Видалено {$deleted} файлів логів", 'success');
             // Редирект после удаления всех логов для предотвращения повторного выполнения
             Response::redirectStatic(UrlHelper::admin('logs-view'));
@@ -379,14 +380,17 @@ class LogsViewAdminPage extends AdminPage
                 // Проверяем, что файл находится в директории логов
                 if (str_starts_with($realFilePath, $realLogsDir)) {
                     if (@unlink($filePath)) {
+                        logger()->logInfo('Файл логу видалено', ['file' => basename($file)]);
                         $this->setMessage('Файл логу успішно видалено', 'success');
                         // Перенаправляем на страницу без выбранного файла
                         Response::redirectStatic(UrlHelper::admin('logs-view'));
                         exit; // Обязательно выходим после редиректа
                     } else {
+                        logger()->logWarning('Помилка видалення файлу логу', ['file' => basename($file)]);
                         $this->setMessage('Помилка при видаленні файлу логу. Перевірте права доступу.', 'danger');
                     }
                 } else {
+                    logger()->logWarning('Спроба видалення файлу поза директорією логів', ['file' => $file]);
                     $this->setMessage('Помилка безпеки: файл знаходиться поза дозволеною директорією', 'danger');
                 }
             } else {
@@ -619,6 +623,12 @@ class LogsViewAdminPage extends AdminPage
 
         // Генеруємо ім'я файлу для експорту
         $exportFilename = 'logs-export-' . date('Y-m-d_H-i-s') . '.' . $format;
+
+        logger()->logDebug('Експорт логів', [
+            'format' => $format,
+            'file' => $selectedFile,
+            'lines_count' => count($lines),
+        ]);
 
         // Встановлюємо заголовки
         header('Content-Type: ' . match($format) {
